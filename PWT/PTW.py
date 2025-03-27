@@ -1,8 +1,9 @@
 import sys
 import serial
+import serial.tools.list_ports
 import time
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSpinBox,
-                               QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QFileDialog)
+                               QPushButton, QMessageBox, QLabel, QLineEdit, QTextEdit, QComboBox, QFileDialog)
 from PySide6.QtCore import QTimer
 
 
@@ -18,6 +19,7 @@ ERROR_MESSAGES = {
 "E10": "Parameter out of limits"
 }
 
+
 class UNIDOSInterface(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -31,11 +33,17 @@ class UNIDOSInterface(QMainWindow):
 
     def find_unidos_port(self):
         ports = serial.tools.list_ports.comports()
-        for port in ports:
-            if "UNIDOS" in port.description:  # Ajusta esta condición según sea necesario
-                return port.device
+
+        if not ports:
+            print("No se encontraron puertos seriales")
+        else:
+            for port in ports:
+                print(f"{port.device}-{port.description}")
+                print(port.description.split(" ")[0])
+                if "Prolific" in port.description.split(" ")[0]:  # Ajusta esta condición según sea necesario
+                    return port.device
         # Valor por defecto si no se encuentra el dispositivo
-        return "COM5"
+        return "COM7"
 
     def setup_ui(self):
         main_widget = QWidget()
