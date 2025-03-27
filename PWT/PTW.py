@@ -5,6 +5,19 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                                QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QFileDialog)
 from PySide6.QtCore import QTimer
 
+
+ERROR_MESSAGES = {
+"E01": "Unknown command or illegal parameter",
+"E02": "Command not allowed in this context (STA in mode 1, etc.)",
+"E03": "Command not allowed at the moment (UNIDOS E is in a menu or in an error state)",
+"E04": "Command can not be executed, since this would increase the high voltage setting",
+"E05": "Error during zeroing: range Low can not be zeroed",
+"E06": "Zeroing not possible",
+"E07": "Output buffer overflow",
+"E09": "Error at writing to EEPROM",
+"E10": "Parameter out of limits"
+}
+
 class UNIDOSInterface(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -16,12 +29,20 @@ class UNIDOSInterface(QMainWindow):
 
         self.setup_ui()
 
+    def find_unidos_port(self):
+        ports = serial.tools.list_ports.comports()
+        for port in ports:
+            if "UNIDOS" in port.description:  # Ajusta esta condición según sea necesario
+                return port.device
+        # Valor por defecto si no se encuentra el dispositivo
+        return "COM5"
+
     def setup_ui(self):
         main_widget = QWidget()
         main_layout = QVBoxLayout()
 
         connection_layout = QHBoxLayout()
-        self.port_input = QLineEdit("COM7")
+        self.port_input = QLineEdit(self.find_unidos_port())
         self.connect_button = QPushButton("Connect")
         self.disconnect_button = QPushButton("Disconnect")
         self.disconnect_button.setEnabled(False)
@@ -125,7 +146,7 @@ class UNIDOSInterface(QMainWindow):
             self.serial_connection.flush()
             time.sleep(delay)
             response = self.serial_connection.read_all().decode('ascii').strip()
-            return response
+            return ERROR_MESSAGES.get(response, response)
         except Exception as e:
             return f"Error: {str(e)}"
 
@@ -175,6 +196,8 @@ class UNIDOSInterface(QMainWindow):
                     file.write("Time, Dose, Unit\n")
                     file.write("\n".join(self.acquired_data))
                 self.state_display.append(f"Data saved to {file_path}")
+                self.show_clear_data_prompt()
+
             except Exception as e:
                 self.state_display.append(f"Error saving data: {str(e)}")
 
@@ -185,6 +208,16 @@ class UNIDOSInterface(QMainWindow):
     def update_timer_interval(self):
         if self.measurement_timer.isActive():
             self.measurement_timer.setInterval(self.interval_input.value() * 1000)
+
+    def show_clear_data_prompt(self):
+        msg_box = QMessageBox()
+        msg_box.setText("Data saved successfully. Do you want to clear the data?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        result = msg_box.exec()
+
+        if result == QMessageBox.Yes:
+            self.data_display.clear()
+            self.acquired_data = []
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
