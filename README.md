@@ -42,5 +42,5 @@ Time, Dose, Unit
 Las contribuciones son bienvenidas. Si encuentras algún problema o deseas mejorar la aplicación, crea un issue o un pull request en este repositorio.
 
 ## Licencia
-Este proyecto está bajo la licencia MIT.
+Este proyecto está bajo la Apache License.
 
