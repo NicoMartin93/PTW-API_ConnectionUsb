@@ -1,0 +1,9 @@
+{
+	"app_name":"PTW",
+	"version":"1.1.0",
+	"settings": {
+		"theme":"dark",
+		"lenguaje":"es",
+		"log_level":"info"
+		}
+}

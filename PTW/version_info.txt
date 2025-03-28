@@ -1,0 +1,4 @@
+# CompanyName=LIIFAMIRX
+# FileDescription=Aplicación PWT UNIDOS E
+# FileVersion=1.1.0
+# ProductVersion=1.1.0
